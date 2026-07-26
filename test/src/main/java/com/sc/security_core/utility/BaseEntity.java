@@ -1,4 +1,4 @@
-package com.back.test.utility;
+package com.sc.security_core.utility;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.back.test.security;
+package com.sc.security_core.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

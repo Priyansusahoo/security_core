@@ -1,7 +1,7 @@
-package com.back.test.config;
+package com.sc.security_core.config;
 
-import com.back.test.security.JwtAuthenticationFilter;
-import com.back.test.user.Role;
+import com.sc.security_core.security.JwtAuthenticationFilter;
+import com.sc.security_core.user.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

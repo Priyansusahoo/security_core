@@ -1,12 +1,12 @@
-package com.back.test.auth;
+package com.sc.security_core.auth;
 
-import com.back.test.auth.dto.AuthResponse;
-import com.back.test.auth.dto.LoginRequest;
-import com.back.test.auth.dto.RegisterRequest;
-import com.back.test.security.JwtService;
-import com.back.test.user.Role;
-import com.back.test.user.User;
-import com.back.test.user.UserRepository;
+import com.sc.security_core.auth.dto.AuthResponse;
+import com.sc.security_core.auth.dto.LoginRequest;
+import com.sc.security_core.auth.dto.RegisterRequest;
+import com.sc.security_core.security.JwtService;
+import com.sc.security_core.user.Role;
+import com.sc.security_core.user.User;
+import com.sc.security_core.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

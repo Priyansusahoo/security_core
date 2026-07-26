@@ -1,4 +1,4 @@
-package com.back.test.user;
+package com.sc.security_core.user;
 
 public enum Role {
     USER,

@@ -1,6 +1,6 @@
-package com.back.test.auth.dto;
+package com.sc.security_core.auth.dto;
 
-import com.back.test.user.Role;
+import com.sc.security_core.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

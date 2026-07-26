@@ -1,8 +1,8 @@
-package com.back.test.auth;
+package com.sc.security_core.auth;
 
-import com.back.test.auth.dto.AuthResponse;
-import com.back.test.auth.dto.LoginRequest;
-import com.back.test.auth.dto.RegisterRequest;
+import com.sc.security_core.auth.dto.AuthResponse;
+import com.sc.security_core.auth.dto.LoginRequest;
+import com.sc.security_core.auth.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

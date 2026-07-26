@@ -1,6 +1,6 @@
-package com.back.test.config;
+package com.sc.security_core.config;
 
-import com.back.test.security.CustomUserDetailsService;
+import com.sc.security_core.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

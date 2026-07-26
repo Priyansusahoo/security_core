@@ -1,6 +1,6 @@
-package com.back.test.security;
+package com.sc.security_core.security;
 
-import com.back.test.user.UserRepository;
+import com.sc.security_core.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.back.test.user;
+package com.sc.security_core.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
