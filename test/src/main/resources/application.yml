@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: ${SPRING_APP_NAME:bank}
+
+  datasource:
+    url: ${DATASOURCE_URL:changeme}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:changeme}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME:org.postgresql.Driver}
+
+    hikari:
+      pool-name: ${HIKARI_POOL_NAME:EasyByteHikariPool}
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:10}
+      minimum-idle: ${HIKARI_MIN_IDLE:2}
+      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${HIKARI_IDLE_TIMEOUT:600000}
+      max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:false}
+        dialect:  ${JPA_PROPERTIES_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+
+application:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:changeme}
+      expiration: ${JWT_EXPIRATION:86400000} # 24 hours
