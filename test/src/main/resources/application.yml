@@ -30,3 +30,9 @@ application:
     jwt:
       secret: ${JWT_SECRET:changeme}
       expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

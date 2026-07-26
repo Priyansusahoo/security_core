@@ -30,6 +30,17 @@ public class SecurityConfiguration {
                         .requestMatchers("/v1/api/auth/**").permitAll()
                         .requestMatchers("/v1/api/admin/**").hasRole(String.valueOf(Role.ADMIN))
                         .requestMatchers("/v1/api/account/**").hasAnyRole(String.valueOf(Role.USER), String.valueOf(Role.ADMIN))
+                        .requestMatchers(
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session.
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS)
