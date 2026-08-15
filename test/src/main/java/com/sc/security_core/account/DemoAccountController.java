@@ -14,7 +14,8 @@ import java.util.Map;
 @Deprecated
 public class DemoAccountController {
 
-    @GetMapping("/my-balance")
+    @Deprecated
+	@GetMapping("/my-balance")
     public ResponseEntity<Map<String, Object>> getMyBalance() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assert authentication != null;
@@ -27,7 +28,8 @@ public class DemoAccountController {
         ));
     }
 
-    @GetMapping("/admin/all-accounts")
+    @Deprecated
+	@GetMapping("/admin/all-accounts")
     public ResponseEntity<Map<String, Object>> getAllAccounts() {
         return ResponseEntity.ok(Map.of(
                 "totalAccounts", 142,

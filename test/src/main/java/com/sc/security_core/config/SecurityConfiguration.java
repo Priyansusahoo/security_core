@@ -21,11 +21,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
+    
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    	
         http.csrf(AbstractHttpConfigurer :: disable)
+        
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/api/auth/**").permitAll()
                         .requestMatchers("/v1/api/admin/**").hasRole(String.valueOf(Role.ADMIN))
@@ -41,10 +44,14 @@ public class SecurityConfiguration {
                                 "/webjars/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        
                         .anyRequest().authenticated()
+                        
                 ).sessionManagement(session -> session.
-                        sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                		sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        
                 ).authenticationProvider(authenticationProvider)
+                
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

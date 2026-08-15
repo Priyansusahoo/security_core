@@ -1,13 +1,14 @@
 package com.sc.security_core.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor @NoArgsConstructor @Builder
 public class AuthResponse {
+
+    @ToString.Exclude
     private String token;
+    
     private String message;
+    
 }

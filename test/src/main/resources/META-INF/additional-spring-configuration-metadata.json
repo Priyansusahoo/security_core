@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "application.security.jwt.secret",
+    "type": "java.lang.String",
+    "description": "jwt secret key. Never share this with anyone. 16 bytes recommended. change this on regular basis for security reasons."
+  },
+  {
+    "name": "application.security.jwt.expiration",
+    "type": "java.lang.String",
+    "description": "JSON web token expiration time. recommended 15 minutes."
+  }
+]}

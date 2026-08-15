@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 @OpenAPIDefinition(
         info = @Info(
                 title = "Security Core",
-                description = "Stateless Security Architecture with JWT",
+                description = "Security module - JWT",
                 version = "1.0",
                 contact = @Contact(name = "Priyansu Sahoo", email = "priyansu.sahoo.atl.1@gmail.com")
         ),
