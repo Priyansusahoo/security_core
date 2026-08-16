@@ -1,0 +1,19 @@
+reviews:
+  profile: "chill"           # Options: chill, assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false                # Disable the fun poem in summaries
+  review_status: true
+
+  # Tell CodeRabbit about your tech stack for better reviews
+  path_instructions:
+    - path: "**/*.java"
+      instructions: |
+        This is a Spring Boot 4 security module using:
+        - JWT (JJWT 0.13.0) for authentication
+        - Spring Security 7.x
+        - Redis for token management
+        - Flyway for database migrations
+        - Lombok for boilerplate reduction
+        Review for: security vulnerabilities, OWASP Top 10, 
+        Spring Security misconfigurations, and Lombok best practices.
