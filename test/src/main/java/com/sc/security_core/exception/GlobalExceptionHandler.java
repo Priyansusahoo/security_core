@@ -199,4 +199,19 @@ public class GlobalExceptionHandler {
         problem.setProperty("timestamp", Instant.now());
         return problem;
     }
+
+    /**
+     * Handles malformed JSON payloads or unparseable request bodies.
+     */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadableException(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Malformed request body. Please verify JSON formatting and field types."
+        );
+        problem.setTitle("Malformed JSON Request");
+        problem.setType(BASE_ERROR_TYPE.resolve("malformed-request"));
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
 }

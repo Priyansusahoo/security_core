@@ -2,6 +2,7 @@ package com.sc.security_core.auth;
 
 import com.sc.security_core.auth.dto.AuthResponse;
 import com.sc.security_core.auth.dto.LoginRequest;
+import com.sc.security_core.auth.dto.LoginResponse;
 import com.sc.security_core.auth.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
     	
         return ResponseEntity.ok(authService.login(request));
         

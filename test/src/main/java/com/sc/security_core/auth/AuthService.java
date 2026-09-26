@@ -1,14 +1,13 @@
 package com.sc.security_core.auth;
 
 import com.sc.mfa_core.config.MfaProperties;
+import com.sc.mfa_core.dto.MfaChallengeResponse;
 import com.sc.mfa_core.dto.MfaResendRequest;
 import com.sc.mfa_core.dto.MfaVerificationRequest;
 import com.sc.mfa_core.dto.MfaVerificationResult;
 import com.sc.mfa_core.service.MfaService;
 import com.sc.otp_core.domain.OtpChannel;
-import com.sc.security_core.auth.dto.AuthResponse;
-import com.sc.security_core.auth.dto.LoginRequest;
-import com.sc.security_core.auth.dto.RegisterRequest;
+import com.sc.security_core.auth.dto.*;
 import com.sc.security_core.security.JwtService;
 import com.sc.security_core.user.Role;
 import com.sc.security_core.user.User;
@@ -61,7 +60,7 @@ public class AuthService {
                 .build();
     }
 
-    public Object login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
     	
     	log.info("Attempting to authenticate user with email: {}", request.getEmail());
         authenticationManager.authenticate(
@@ -75,8 +74,9 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
         if (mfaProperties.isEnabled() /* && user.isMfaEnabled() */) {
+            MfaChallengeResponse challenge = mfaService.initiateChallenge(user.getEmail(), OtpChannel.EMAIL);
             // Return MfaChallengeResponse instead of the JWT token
-            return mfaService.initiateChallenge(user.getEmail(), OtpChannel.EMAIL);
+            return MfaRequiredResponse.from(challenge);
         }
         var jwtToken = jwtService.generateToken(user);
         log.info("User {} authenticated successfully. Generating JWT.", user.getEmail());

@@ -5,7 +5,6 @@ import com.sc.mfa_core.dto.MfaResendRequest;
 import com.sc.mfa_core.dto.MfaVerificationRequest;
 import com.sc.mfa_core.dto.MfaVerificationResult;
 import com.sc.otp_core.domain.OtpChannel;
-import com.sc.security_core.auth.dto.AuthResponse;
 
 /**
  * Core orchestration service for Multi-Factor Authentication challenge lifecycles.
