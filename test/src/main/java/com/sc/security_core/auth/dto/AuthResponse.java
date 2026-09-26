@@ -4,7 +4,7 @@ import lombok.*;
 
 @Data
 @AllArgsConstructor @NoArgsConstructor @Builder
-public class AuthResponse {
+public non-sealed class AuthResponse implements LoginResponse {
 
     @ToString.Exclude
     private String token;

@@ -1,5 +1,5 @@
 reviews:
-  profile: "chill"           # Options: chill, assertive
+  profile: "assertive"           # Options: chill, assertive
   request_changes_workflow: false
   high_level_summary: true
   poem: false                # Disable the fun poem in summaries

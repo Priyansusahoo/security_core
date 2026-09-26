@@ -1,3 +1,4 @@
 /.metadata/
 test/bin
 test/logs/*
+/logs/
