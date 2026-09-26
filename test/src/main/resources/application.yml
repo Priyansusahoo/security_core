@@ -30,11 +30,40 @@ spring:
     baseline-on-migrate: true
     baseline-version: "0"
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      password: ${REDIS_PASSWORD:}
+      port: ${REDIS_PORT:6379}
+      timeout: ${REDIS_TIMEOUT:10000}
+
+  mail:
+    username: ${SPRING_MAIL_USERNAME:noreply.modelx.store@gmail.com}
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    password: ${GMAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 application:
   security:
     jwt:
       secret: ${JWT_SECRET:changeme}
       expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+    otp:
+      expiration: ${OTP_EXPIRATION:5m}
+      length: ${OTP_LENGTH:6}
+      max-attempts: ${OTP_MAX_ATTEMPTS:3}
+      resend-cooldown: ${OTP_RESEND_COOLDOWN:60s}
+      storage-type: ${OTP_STORAGE_TYPE:DB} # Choose DB, REDIS, or MEMORY
 
 springdoc:
   api-docs:
