@@ -5,7 +5,7 @@ import com.sc.otp_core.domain.OtpSession;
 import com.sc.otp_core.storage.OtpStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-@ConditionalOnBean(RedisTemplate.class)
+@ConditionalOnProperty(name = "application.security.otp.storage-type", havingValue = "REDIS")
 @RequiredArgsConstructor
 public class RedisOtpStorage implements OtpStorage {
 

@@ -1,5 +1,11 @@
 package com.sc.security_core.auth;
 
+import com.sc.mfa_core.config.MfaProperties;
+import com.sc.mfa_core.dto.MfaResendRequest;
+import com.sc.mfa_core.dto.MfaVerificationRequest;
+import com.sc.mfa_core.dto.MfaVerificationResult;
+import com.sc.mfa_core.service.MfaService;
+import com.sc.otp_core.domain.OtpChannel;
 import com.sc.security_core.auth.dto.AuthResponse;
 import com.sc.security_core.auth.dto.LoginRequest;
 import com.sc.security_core.auth.dto.RegisterRequest;
@@ -12,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +34,10 @@ public class AuthService {
     private final JwtService jwtService;
     
     private final AuthenticationManager authenticationManager;
+
+    private final MfaProperties mfaProperties;
+
+    private final MfaService mfaService;
 
     public AuthResponse register(RegisterRequest request) {
     	
@@ -50,7 +61,7 @@ public class AuthService {
                 .build();
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public Object login(LoginRequest request) {
     	
     	log.info("Attempting to authenticate user with email: {}", request.getEmail());
         authenticationManager.authenticate(
@@ -62,6 +73,11 @@ public class AuthService {
         
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+        if (mfaProperties.isEnabled() /* && user.isMfaEnabled() */) {
+            // Return MfaChallengeResponse instead of the JWT token
+            return mfaService.initiateChallenge(user.getEmail(), OtpChannel.EMAIL);
+        }
         var jwtToken = jwtService.generateToken(user);
         log.info("User {} authenticated successfully. Generating JWT.", user.getEmail());
 
@@ -69,5 +85,31 @@ public class AuthService {
                 .token(jwtToken)
                 .message("Login successful!")
                 .build();
+    }
+
+    /**
+     * Completes authentication following a successful MFA challenge validation.
+     *
+     * @param request Verification request containing challenge ticket and candidate code
+     * @return Finalized {@link AuthResponse} containing the issued JWT
+     */
+    public AuthResponse verifyMfa(MfaVerificationRequest request) {
+        MfaVerificationResult result = mfaService.verifyChallenge(request);
+        User user = userRepository.findByEmail(result.target())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found for target: " + result.target()));
+        String jwtToken = jwtService.generateToken(user);
+        log.info("User [{}] successfully completed MFA verification. JWT issued.", user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .message("Login successful!")
+                .build();
+    }
+    /**
+     * Dispatches a fresh verification code for an existing MFA challenge.
+     *
+     * @param request Payload containing the active challenge ticket
+     */
+    public void resendMfa(MfaResendRequest request) {
+        mfaService.resendCode(request);
     }
 }

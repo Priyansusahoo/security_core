@@ -33,7 +33,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD:Test@1234}
       port: ${REDIS_PORT:6379}
       timeout: ${REDIS_TIMEOUT:10000}
 
@@ -41,7 +41,7 @@ spring:
     username: ${SPRING_MAIL_USERNAME:noreply.modelx.store@gmail.com}
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:587}
-    password: ${GMAIL_APP_PASSWORD:}
+    password: ${GMAIL_APP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -63,7 +63,11 @@ application:
       length: ${OTP_LENGTH:6}
       max-attempts: ${OTP_MAX_ATTEMPTS:3}
       resend-cooldown: ${OTP_RESEND_COOLDOWN:60s}
-      storage-type: ${OTP_STORAGE_TYPE:DB} # Choose DB, REDIS, or MEMORY
+      storage-type: ${OTP_STORAGE_TYPE:REDIS} # Choose DB, REDIS, or MEMORY
+    mfa:
+      enabled: true
+      challenge-ttl: 5m
+      storage-type: ${MFA_STORAGE_TYPE:REDIS} # Choose DB, REDIS, or MEMORY
 
 springdoc:
   api-docs:

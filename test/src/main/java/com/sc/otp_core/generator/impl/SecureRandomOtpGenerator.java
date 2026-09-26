@@ -13,17 +13,19 @@ public class SecureRandomOtpGenerator implements OtpGenerator {
     /**
      * Generates a numeric OTP of specified length.
      *
-     * @param length Number of digits (e.g., 6)
-     * @return Generated numeric string (e.g., "482910")
+     * @param length Number of digits (e.g. 6)
+     * @return Numeric OTP string
+     * @throws IllegalArgumentException if length is not between 1 and 32
      */
     @Override
     public String generate(int length) {
         if (length <= 0) {
-            throw new IllegalArgumentException("OTP length must be greater than 0");
+            throw new IllegalArgumentException("OTP length must be between 1 and 32 digits");
         }
-        int bound = (int) Math.pow(10, length);
-        int number = secureRandom.nextInt(bound);
-
-        return String.format("%0" + length + "d", number);
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(secureRandom.nextInt(10));
+        }
+        return sb.toString();
     }
 }

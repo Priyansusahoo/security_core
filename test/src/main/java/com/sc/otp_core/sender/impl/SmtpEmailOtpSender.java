@@ -7,14 +7,16 @@ import com.sc.otp_core.template.OtpTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * SMTP implementation of {@link OtpSender} delivering codes via email.
+ */
 @Component
 @RequiredArgsConstructor @Slf4j
-@ConditionalOnBean(JavaMailSender.class)
 public class SmtpEmailOtpSender implements OtpSender {
 
     private final JavaMailSender mailSender;
@@ -22,13 +24,15 @@ public class SmtpEmailOtpSender implements OtpSender {
 
     @Value("${spring.mail.username}")
     private String fromEmail;
+
     /**
-     * Sends the OTP to the recipient.
+     * Asynchronously sends the one-time password via configured SMTP mail server.
      *
-     * @param recipient Target email address or phone number
-     * @param plainOtp  Plaintext OTP to deliver
-     * @param purpose   Reason for OTP (MFA, password reset)
+     * @param recipient Target email address, phone number, etc.
+     * @param plainOtp  Plaintext one-time password
+     * @param purpose   Purpose for the OTP dispatch (MFA, password reset)
      */
+    @Async
     @Override
     public void send(String recipient, String plainOtp, OtpPurpose purpose) {
         String subject = templateService.resolveSubject(purpose);
@@ -46,6 +50,8 @@ public class SmtpEmailOtpSender implements OtpSender {
 
     /**
      * Declares the channel supported by this sender (EMAIL, SMS, etc.).
+     *
+     * @return {@link OtpChannel#EMAIL}
      */
     @Override
     public OtpChannel supportsChannel() {

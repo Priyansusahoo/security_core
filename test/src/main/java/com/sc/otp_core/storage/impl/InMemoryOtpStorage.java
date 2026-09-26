@@ -5,7 +5,7 @@ import com.sc.otp_core.domain.OtpPurpose;
 import com.sc.otp_core.domain.OtpSession;
 import com.sc.otp_core.storage.OtpStorage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -13,9 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Volatile in-memory fallback implementation of {@link OtpStorage}.
+ */
 @Slf4j
 @Component
-@ConditionalOnMissingBean(RedisOtpStorage.class)
+@ConditionalOnProperty(name = "application.security.otp.storage-type", havingValue = "MEMORY")
 public class InMemoryOtpStorage implements OtpStorage {
 
     private final Map<String, OtpSession> cache = new ConcurrentHashMap<>();
