@@ -54,7 +54,7 @@ public class User extends BaseEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
 
     @Column(nullable = false) @Builder.Default
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     @Override @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
