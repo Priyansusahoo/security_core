@@ -8,6 +8,7 @@ import com.sc.mfa_core.dto.MfaVerificationResult;
 import com.sc.mfa_core.service.MfaService;
 import com.sc.otp_core.domain.OtpChannel;
 import com.sc.otp_core.domain.OtpPurpose;
+import com.sc.otp_core.exception.OtpException;
 import com.sc.otp_core.service.OtpService;
 import com.sc.security_core.auth.dto.*;
 import com.sc.security_core.security.JwtService;
@@ -42,10 +43,10 @@ public class AuthService {
 
     /**
      * Registers a new user account or recovers a previously unverified registration.
-     * If an unverified account already exists with this email, its details are refreshed
-     * and a fresh verification code is dispatched (self-healing registration).
+     * Prevents credential or role tampering prior to mailbox verification.
      */
     public Map<String, Object> register(RegisterRequest request) {
+        validatePassword(request.getPassword());
         String email = normalizeEmail(request.getEmail());
         Optional<User> existingUserOpt = userRepository.findByEmail(email);
         User user;
@@ -54,22 +55,16 @@ public class AuthService {
             if (existingUser.isEnabled()) {
                 throw new IllegalArgumentException("Email is already registered! Please sign in.");
             }
-            // Self-healing: update profile and password for previously unverified registration
-            existingUser.setFirstName(request.getFirstName());
-            existingUser.setLastName(request.getLastName());
-            existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
-            if (request.getRole() != null) {
-                existingUser.setRole(request.getRole());
-            }
-            user = userRepository.save(existingUser);
-            log.info("Refreshed pending registration profile for unverified user {}", email);
+            // Do not mutate credentials or roles before mailbox ownership is proven
+            user = existingUser;
+            log.info("Re-dispatching verification code for pending registration: {}", email);
         } else {
             user = User.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .email(email)
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(request.getRole() != null ? request.getRole() : Role.USER)
+                    .role(Role.USER) // Enforce default user role for public registrations
                     .enabled(false)
                     .build();
             user = userRepository.save(user);
@@ -166,8 +161,12 @@ public class AuthService {
         String email = normalizeEmail(request.email());
         userRepository.findByEmail(email).ifPresent(user -> {
             if (!user.isEnabled()) {
-                otpService.generateAndSend(user.getEmail(), OtpPurpose.EMAIL_VERIFICATION, OtpChannel.EMAIL);
-                log.info("Resent registration email verification OTP to {}", user.getEmail());
+                try {
+                    otpService.generateAndSend(user.getEmail(), OtpPurpose.EMAIL_VERIFICATION, OtpChannel.EMAIL);
+                    log.info("Resent registration email verification OTP to {}", user.getEmail());
+                } catch (OtpException ex) {
+                    log.warn("Email verification OTP was not resent for {}: {}", user.getEmail(), ex.getMessage());
+                }
             } else {
                 log.debug("Verification resend skipped: account [{}] is already enabled", email);
             }
@@ -181,8 +180,12 @@ public class AuthService {
     public void forgotPassword(ForgotPasswordRequest request) {
         String email = normalizeEmail(request.email());
         userRepository.findByEmail(email).ifPresent(user -> {
-            otpService.generateAndSend(user.getEmail(), OtpPurpose.PASSWORD_RESET, OtpChannel.EMAIL);
-            log.info("Dispatched password reset OTP to {}", user.getEmail());
+            try {
+                otpService.generateAndSend(user.getEmail(), OtpPurpose.PASSWORD_RESET, OtpChannel.EMAIL);
+                log.info("Dispatched password reset OTP to {}", user.getEmail());
+            } catch (OtpException ex) {
+                log.warn("Password reset OTP was not dispatched for {}: {}", user.getEmail(), ex.getMessage());
+            }
         });
     }
 
@@ -190,6 +193,7 @@ public class AuthService {
      * Validates the reset OTP and updates the user's password.
      */
     public void resetPassword(ResetPasswordRequest request) {
+        validatePassword(request.newPassword());
         String email = normalizeEmail(request.email());
         // Verify candidate OTP against HMAC-SHA256 in OtpService
         otpService.verify(email, OtpPurpose.PASSWORD_RESET, request.code());
@@ -206,5 +210,14 @@ public class AuthService {
      */
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Validates that candidate password conforms to system minimum length requirements.
+     */
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
     }
 }
