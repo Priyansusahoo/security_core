@@ -40,6 +40,18 @@ public class AuthController {
     @PostMapping("/verify-email/resend")
     public ResponseEntity<Map<String, String>> resendEmailVerification(@Valid @RequestBody EmailResendRequest request) {
         authService.resendEmailVerification(request);
-        return ResponseEntity.ok(Map.of("message", "A new verification code has been dispatched."));
+        return ResponseEntity.ok(Map.of("message", "If an unverified account exists for this email, a verification code has been dispatched."));
+    }
+
+    @PostMapping("/password/forgot")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of("message", "If an account exists for this email, a password reset code has been sent."));
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Password has been reset successfully. Please sign in with your new password."));
     }
 }

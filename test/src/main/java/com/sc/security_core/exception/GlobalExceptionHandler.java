@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.jsonwebtoken.JwtException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.net.URI;
 import java.time.Instant;
@@ -211,6 +212,21 @@ public class GlobalExceptionHandler {
         );
         problem.setTitle("Malformed JSON Request");
         problem.setType(BASE_ERROR_TYPE.resolve("malformed-request"));
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
+    /**
+     * Handles resource not found and send 404 instead of 500
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ProblemDetail handleNoResourceFoundException(NoResourceFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                "The requested endpoint does not exist: " + ex.getResourcePath()
+        );
+        problem.setTitle("Endpoint Not Found");
+        problem.setType(BASE_ERROR_TYPE.resolve("not-found"));
         problem.setProperty("timestamp", Instant.now());
         return problem;
     }
