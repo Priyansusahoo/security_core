@@ -7,6 +7,8 @@ import com.sc.mfa_core.dto.MfaVerificationRequest;
 import com.sc.mfa_core.dto.MfaVerificationResult;
 import com.sc.mfa_core.service.MfaService;
 import com.sc.otp_core.domain.OtpChannel;
+import com.sc.otp_core.domain.OtpPurpose;
+import com.sc.otp_core.service.OtpService;
 import com.sc.security_core.auth.dto.*;
 import com.sc.security_core.security.JwtService;
 import com.sc.security_core.user.Role;
@@ -21,24 +23,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
-    
     private final PasswordEncoder passwordEncoder;
-    
     private final JwtService jwtService;
-    
     private final AuthenticationManager authenticationManager;
-
     private final MfaProperties mfaProperties;
-
     private final MfaService mfaService;
+    private final OtpService otpService;
 
-    public AuthResponse register(RegisterRequest request) {
+    public Map<String, Object> register(RegisterRequest request) {
     	
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email is already registered!");
@@ -49,15 +49,19 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole() != null ? request.getRole() : Role.USER)
+                .enabled(false)
                 .build();
 
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
 
-        return AuthResponse.builder()
-                .token(jwtToken)
-                .message("User registered successfully!")
-                .build();
+        otpService.generateAndSend(user.getEmail(), OtpPurpose.EMAIL_VERIFICATION, OtpChannel.EMAIL);
+        log.info("Dispatched registration email verification OTP to {}", user.getEmail());
+
+        return Map.of(
+                "message", "Verification code sent to your email. Please verify to complete registration.",
+                "email", user.getEmail(),
+                "verificationRequired", true
+        );
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -111,5 +115,37 @@ public class AuthService {
      */
     public void resendMfa(MfaResendRequest request) {
         mfaService.resendCode(request);
+    }
+
+    /**
+     * Validates the email OTP, activates the user account, and issues the JWT token.
+     */
+    public AuthResponse verifyEmail(EmailVerificationRequest request) {
+        // 1. Verify candidate OTP against HMAC-SHA256 in OtpService
+        otpService.verify(request.email(), OtpPurpose.EMAIL_VERIFICATION, request.code());
+        // 2. Activate the user account
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.email()));
+        user.setEnabled(true);
+        userRepository.save(user);
+        // 3. Mint JWT token
+        String jwtToken = jwtService.generateToken(user);
+        log.info("User [{}] successfully verified email. Account enabled and JWT issued.", user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .message("Email verified successfully! Registration complete.")
+                .build();
+    }
+    /**
+     * Dispatches a fresh verification OTP for unverified registrations.
+     */
+    public void resendEmailVerification(EmailResendRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.email()));
+        if (user.isEnabled()) {
+            throw new IllegalArgumentException("Account is already verified. Please sign in.");
+        }
+        otpService.generateAndSend(user.getEmail(), OtpPurpose.EMAIL_VERIFICATION, OtpChannel.EMAIL);
+        log.info("Resent registration email verification OTP to {}", user.getEmail());
     }
 }
