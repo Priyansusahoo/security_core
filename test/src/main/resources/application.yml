@@ -1,6 +1,12 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: ${SPRING_APP_NAME:security-service}
+#  profiles:
+#    active: ${SPRING_PROFILES_ACTIVE:local}
+
 
   datasource:
     url: ${DATASOURCE_URL:changeme}
@@ -54,6 +60,9 @@ spring:
           writetimeout: 5000
 
 application:
+  gateway:
+    shared-secret: ${GATEWAY_SHARED_SECRET}
+    enforce-secret: ${ENFORCE_GATEWAY_SECRET:true}
   security:
     jwt:
       secret: ${JWT_SECRET:changeme}
@@ -86,3 +95,13 @@ logging:
   level:
     "[org.springframework.web]": "debug"
     "[org.hibernate]": "error"
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true

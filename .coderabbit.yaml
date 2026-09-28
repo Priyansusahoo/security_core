@@ -2,18 +2,45 @@ reviews:
   profile: "assertive"           # Options: chill, assertive
   request_changes_workflow: false
   high_level_summary: true
-  poem: false                # Disable the fun poem in summaries
+  poem: false                    # Disable the fun poem in summaries
   review_status: true
 
-  # Tell CodeRabbit about your tech stack for better reviews
+  # Microservices Architecture Context & Specialized Review Instructions
   path_instructions:
     - path: "**/*.java"
       instructions: |
-        This is a Spring Boot 4 security module using:
-        - JWT (JJWT 0.13.0) for authentication
-        - Spring Security 7.x
-        - Redis for token management
-        - Flyway for database migrations
-        - Lombok for boilerplate reduction
-        Review for: security vulnerabilities, OWASP Top 10, 
-        Spring Security misconfigurations, and Lombok best practices.
+        ## Architecture Context
+        This repository is a distributed banking microservices ecosystem using Java 25, Spring Boot 4.1.x, and Spring Cloud 2025.1.x consisting of:
+        1. `discovery-service`: Netflix Eureka Server (service registry and heartbeat monitor).
+        2. `gateway-service`: Reactive Spring Cloud Gateway (WebFlux / Netty) acting as the single public entry point, centralized CORS handler, and dynamic reverse proxy.
+        3. `security-service` (in `test/`): Authentication, Authorization, MFA (TOTP/Email), OTP verification, JWT generation/validation, PostgreSQL, Redis, and Flyway.
+        4. Domain services (e.g. `product-service`): Domain-specific microservices with dedicated isolated databases communicating via REST / OpenFeign / gRPC.
+
+        ## Review Priorities & Edge Cases:
+        1. **Microservice Isolation & Database-Per-Service**:
+           - Verify that domain services NEVER connect to another service's database directly.
+           - Ensure inter-service communication uses proper DTOs, timeouts, and fault-tolerant patterns.
+
+        2. **Perimeter Security & Gateway Ingress**:
+           - In production, downstream services reside in a private network and must not be accessed directly. Review any perimeter security mechanisms (e.g., internal gateway headers `X-Gateway-Secret`, internal JWT tokens).
+           - Do NOT configure redundant CORS in downstream services; CORS must be handled centrally at the API Gateway (`gateway-service`) to prevent duplicate header conflicts.
+
+        3. **Security, Auth & OWASP Top 10**:
+           - Review JWT validation (JJWT 0.13.0): verify signature algorithms, expiration validation, and prevention of algorithm confusion.
+           - Prevent user enumeration (CWE-204) and account takeover (CWE-640) in registration, password reset, and OTP/MFA verification flows.
+           - Enforce strict input validation using Jakarta Validation (`@Valid`, `@NotBlank`, etc.) on all public request DTOs.
+           - Enforce constant-time checks where appropriate to prevent timing attacks.
+
+        4. **Resilience, Concurrency & Java 25**:
+           - Review thread-safety and proper async handling (`@EnableAsync`, Virtual Threads, Reactive Netty pipelines).
+           - Ensure proper connection pooling (HikariCP) and timeout configurations on database, Redis, and HTTP client interactions.
+
+        5. **Error Handling & Information Disclosure**:
+           - Ensure exception handlers return standard RFC 7807 (ProblemDetail) error bodies and never leak raw stack traces, database schema details, or internal server IPs.
+
+    - path: "**/resources/application*.yml"
+      instructions: |
+        ## Configuration Architecture:
+        - `application.yml`: Base production-ready templates and placeholders (`${ENV_VAR:fallback}`). Must NEVER contain hardcoded secrets, production passwords, or sensitive keys.
+        - `application-local.yml`: Local profile configuration (`spring.profiles.active: local`) containing local developer defaults and overrides.
+        - Ensure Eureka client/server configurations, port assignments, and gateway route predicates match the intended architecture without port collisions.
