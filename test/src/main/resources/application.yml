@@ -4,9 +4,6 @@ server:
 spring:
   application:
     name: ${SPRING_APP_NAME:security-service}
-#  profiles:
-#    active: ${SPRING_PROFILES_ACTIVE:local}
-
 
   datasource:
     url: ${DATASOURCE_URL:changeme}
@@ -93,12 +90,13 @@ logging:
       max-history: 30
       clean-history-on-start: false
   level:
-    "[org.springframework.web]": "debug"
+    "[org.springframework.web]": "info"
     "[org.hibernate]": "error"
 
 eureka:
   instance:
     prefer-ip-address: true
+    #instance-id: ${spring.application.name}:${server.port} # local
     instance-id: ${spring.application.name}:${random.uuid}
   client:
     service-url:

@@ -4,8 +4,6 @@ server:
 spring:
   application:
     name: gateway-service
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
 
   cloud:
     gateway:
@@ -37,7 +35,8 @@ spring:
                   - DELETE
                   - OPTIONS
                   - PATCH
-                allowedHeaders: "*"
+                allowedHeaders:
+                  - "*"
                 allowCredentials: true
 
 eureka:
