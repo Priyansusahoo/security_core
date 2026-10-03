@@ -11,16 +11,16 @@ spring:
         webflux:
           discovery:
             locator:
-              enabled: true
+              enabled: false
               lower-case-service-id: true
           default-filters:
-            - SetRequestHeader=X-Gateway-Secret, ${GATEWAY_SHARED_SECRET:}
+            - SetRequestHeader=X-Gateway-Secret, ${GATEWAY_SHARED_SECRET}
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
           routes:
             - id: security-service-route
               uri: lb://security-service
               predicates:
-                - Path=/v1/api/auth/**, /v1/api/demo-account/**
+                - Path=/v1/api/auth/**, /v1/api/demo-account/**, /swagger-ui/**, /swagger-ui.html, /v3/api-docs/**, /swagger-resources/**, /webjars/**
           globalcors:
             add-to-simple-url-handler-mapping: true
             cors-configurations:
@@ -53,7 +53,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,gateway
+        include: health,info,metrics
   endpoint:
     health:
       show-details: when_authorized

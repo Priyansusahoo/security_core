@@ -26,7 +26,7 @@ public class GatewayHeaderFilter extends OncePerRequestFilter {
 
     public static final String GATEWAY_SECRET_HEADER = "X-Gateway-Secret";
 
-    @Value("${application.gateway.shared-secret:}")
+    @Value("${application.gateway.shared-secret}")
     private String sharedSecret;
 
     @Value("${application.gateway.enforce-secret:true}")
@@ -42,13 +42,8 @@ public class GatewayHeaderFilter extends OncePerRequestFilter {
             return true;
         }
         String path = request.getRequestURI();
-        // Allow internal health checks, error dispatching, and Swagger/OpenAPI documentation to bypass
-        return path.startsWith("/actuator") ||
-               path.startsWith("/error") ||
-               path.startsWith("/v3/api-docs") ||
-               path.startsWith("/swagger-ui") ||
-               path.startsWith("/swagger-resources") ||
-               path.startsWith("/webjars");
+        // Allow internal health checks and error dispatching by bypass
+        return path.startsWith("/actuator/health") || path.startsWith("/error");
     }
 
     @Override
@@ -57,9 +52,9 @@ public class GatewayHeaderFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String incomingSecret = request.getHeader(GATEWAY_SECRET_HEADER);
 
-        if (incomingSecret == null || !MessageDigest.isEqual(
-                incomingSecret.getBytes(StandardCharsets.UTF_8),
-                sharedSecret.getBytes(StandardCharsets.UTF_8))) {
+        if (sharedSecret == null || sharedSecret.isBlank() || incomingSecret == null ||
+                !MessageDigest.isEqual(incomingSecret.getBytes(StandardCharsets.UTF_8), sharedSecret.getBytes(StandardCharsets.UTF_8))) {
+
             log.warn("Blocked direct access attempt to [{}] from remote address [{}] without valid gateway secret",
                     request.getRequestURI(), request.getRemoteAddr());
             response.setStatus(HttpStatus.FORBIDDEN.value());
