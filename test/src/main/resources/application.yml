@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${SPRING_APP_NAME:security-service}
+    name: security-service
 
   datasource:
     url: ${DATASOURCE_URL:changeme}
